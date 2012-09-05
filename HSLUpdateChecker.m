@@ -29,22 +29,11 @@
 
 + (void) checkForUpdate
 {
-    // See if we've checked this version before.
-    NSString *localVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-    NSString *defaultsKey = [NSString stringWithFormat:@"HSL_UPDATE_CHECKER_CHECKED_%@", localVersion];
-    
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:defaultsKey])
-    {
-        // We haven't checked this version. Remember it, and go ahead.
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:defaultsKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        
-        // Go to a background thread for the actual update check.
-        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        dispatch_async(queue, ^{
-            [[HSLUpdateChecker sharedUpdateChecker] actuallyCheck];
-        });
-    }
+    // Go to a background thread for the actual update check.
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(queue, ^{
+        [[HSLUpdateChecker sharedUpdateChecker] actuallyCheck];
+    });
 }
 
 - (void) actuallyCheck
@@ -77,21 +66,28 @@
                 
                 if (![localVersion isEqualToString:appStoreVersion])
                 {
-                    // Different! Present an alert to the user about it.
-                    self.updateUrl = [result objectForKey:@"trackViewUrl"];
-                    NSString *releaseNotes = [result objectForKey:@"releaseNotes"];
-                    NSString *title = [NSString stringWithFormat:@"Version %@ Now Available", appStoreVersion];
-                    NSString *message = [NSString stringWithFormat:@"New in this version:\n%@", releaseNotes];
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                       
-                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
-                                                                        message:message
-                                                                       delegate:self
-                                                              cancelButtonTitle:@"Not Now"
-                                                              otherButtonTitles:@"Update", nil];
-                        [alert show];
-                    });
+                    // Different! Present an alert to the user about it if we haven't already for this appStoreVersion.
+                    NSString *checkedAppStoreVersionKey = [NSString stringWithFormat:@"HSL_UPDATE_CHECKER_CHECKED_%@", appStoreVersion];
+                    if (![[NSUserDefaults standardUserDefaults] boolForKey:checkedAppStoreVersionKey])
+                    {
+                        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:checkedAppStoreVersionKey];
+                        [[NSUserDefaults standardUserDefaults] synchronize];
+                        
+                        self.updateUrl = [result objectForKey:@"trackViewUrl"];
+                        NSString *releaseNotes = [result objectForKey:@"releaseNotes"];
+                        NSString *title = [NSString stringWithFormat:@"Version %@ Now Available", appStoreVersion];
+                        NSString *message = [NSString stringWithFormat:@"New in this version:\n%@", releaseNotes];
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                           
+                            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
+                                                                            message:message
+                                                                           delegate:self
+                                                                  cancelButtonTitle:@"Not Now"
+                                                                  otherButtonTitles:@"Update", nil];
+                            [alert show];
+                        });
+                    }
                 }
             }
         }

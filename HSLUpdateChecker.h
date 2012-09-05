@@ -12,8 +12,8 @@
 // and if the version on the app store is different, it presents an alert with
 // the "What's New" text and a button to go directly to the app store.
 
-// The check and alert will only be performed once per version (so that if a
-// user declines, they do not continue to get bothered).
+// The check and alert will only be performed once per new app store version
+// (so that if a user declines, they do not continue to get bothered).
 
 @interface HSLUpdateChecker : NSObject <UIAlertViewDelegate>
 
