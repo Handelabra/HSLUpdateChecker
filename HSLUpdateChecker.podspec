@@ -3,6 +3,7 @@ Pod::Spec.new do |s|
   s.version      = "1.0.0"
   s.summary      = "Prompts the user to update your app when a new version is available. Zero configuration, one line of code to use."
   s.homepage     = "https://github.com/Handelabra/HSLUpdateChecker"
+  s.license      = "MIT"
   s.author       = { "John Arnold" => "john@handelabra.com" }
   #s.source       = { :git => "https://github.com/Handelabra/HSLUpdateChecker.git", :tag => "1.0.0" }
   s.source       = { :git => "https://github.com/Handelabra/HSLUpdateChecker.git" }
