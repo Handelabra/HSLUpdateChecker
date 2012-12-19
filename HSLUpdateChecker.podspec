@@ -5,8 +5,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/Handelabra/HSLUpdateChecker"
   s.license      = "MIT"
   s.author       = { "John Arnold" => "john@handelabra.com" }
-  #s.source       = { :git => "https://github.com/Handelabra/HSLUpdateChecker.git", :tag => "1.0.0" }
-  s.source       = { :git => "https://github.com/Handelabra/HSLUpdateChecker.git" }
+  s.source       = { :git => "https://github.com/Handelabra/HSLUpdateChecker.git", :tag => "1.0.0" }
   s.platform     = :ios, '5.0'
   s.source_files = 'Classes', 'Classes/**/*.{h,m}'
   s.requires_arc = true
