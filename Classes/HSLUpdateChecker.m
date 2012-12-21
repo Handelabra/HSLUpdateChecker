@@ -27,7 +27,23 @@
     return _sharedObject;
 }
 
-+ (void) checkForUpdate
++ (void)checkForUpdate
+{
+    [self checkForUpdateWithHandler:^(NSString *appStoreVersion, NSString *localVersion, NSString *releaseNotes, NSString *updateURL) {
+        
+        NSString *title = NSLocalizedString(@"Version %@ Now Available", @"Version %@ Now Available");
+        NSString *message = NSLocalizedString(@"New in this version:\n%@", @"New in this version:\n%@");
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:title, appStoreVersion]
+                                                        message:[NSString stringWithFormat:message, releaseNotes]
+                                                       delegate:[HSLUpdateChecker sharedUpdateChecker]
+                                              cancelButtonTitle:NSLocalizedString(@"Not Now", @"Not Now")
+                                              otherButtonTitles:NSLocalizedString(@"Update", @"Update"), nil];
+        [alert show];
+
+    }];
+}
+
++ (void) checkForUpdateWithHandler:(void (^)(NSString *, NSString *, NSString *, NSString *))handler
 {
     // Go to a background thread for the update check.
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -56,7 +72,6 @@
                     NSString *appStoreVersion = [result objectForKey:@"version"];
                     
                     NSString *localVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-                    
                     if (![localVersion isEqualToString:appStoreVersion])
                     {
                         // Different! Present an alert to the user about it if we haven't already for this appStoreVersion.
@@ -67,18 +82,12 @@
                             [[NSUserDefaults standardUserDefaults] synchronize];
                             
                             [HSLUpdateChecker sharedUpdateChecker].updateUrl = [result objectForKey:@"trackViewUrl"];
+                            
                             NSString *releaseNotes = [result objectForKey:@"releaseNotes"];
-                            NSString *title = [NSString stringWithFormat:@"Version %@ Now Available", appStoreVersion];
-                            NSString *message = [NSString stringWithFormat:@"New in this version:\n%@", releaseNotes];
                             
                             dispatch_async(dispatch_get_main_queue(), ^{
-                               
-                                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title
-                                                                                message:message
-                                                                               delegate:[HSLUpdateChecker sharedUpdateChecker]
-                                                                      cancelButtonTitle:@"Not Now"
-                                                                      otherButtonTitles:@"Update", nil];
-                                [alert show];
+                                if (handler)
+                                    handler(appStoreVersion, localVersion, releaseNotes, [HSLUpdateChecker sharedUpdateChecker].updateUrl);
                             });
                         }
                     }

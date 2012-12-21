@@ -18,5 +18,6 @@
 @interface HSLUpdateChecker : NSObject <UIAlertViewDelegate>
 
 + (void) checkForUpdate;
++ (void) checkForUpdateWithHandler:(void (^)(NSString *appStoreVersion, NSString *localVersion, NSString *releaseNotes, NSString *updateURL))handler;
 
 @end
