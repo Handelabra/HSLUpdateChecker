@@ -10,7 +10,7 @@
 
 @interface HSLUpdateChecker ()
 
-@property (copy) NSString *updateUrl; // We need to remember the URL for the alert handler
+@property (nonatomic, copy) NSString *updateUrl; // We need to remember the URL for the default alert handler
 
 @end
 
@@ -30,20 +30,22 @@
 + (void)checkForUpdate
 {
     [self checkForUpdateWithHandler:^(NSString *appStoreVersion, NSString *localVersion, NSString *releaseNotes, NSString *updateURL) {
-        
-        NSString *title = NSLocalizedString(@"Version %@ Now Available", @"Version %@ Now Available");
-        NSString *message = NSLocalizedString(@"New in this version:\n%@", @"New in this version:\n%@");
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:title, appStoreVersion]
-                                                        message:[NSString stringWithFormat:message, releaseNotes]
-                                                       delegate:[HSLUpdateChecker sharedUpdateChecker]
-                                              cancelButtonTitle:NSLocalizedString(@"Not Now", @"Not Now")
-                                              otherButtonTitles:NSLocalizedString(@"Update", @"Update"), nil];
-        [alert show];
 
+        // Remember the URL for the alert delegate
+        [HSLUpdateChecker sharedUpdateChecker].updateUrl = updateURL;
+
+        NSString *titleFormat = NSLocalizedString(@"Version %@ Now Available", @"HSLUpdateChecker upgrade alert message title. The argument is the version number of the update.");
+        NSString *messageFormat = NSLocalizedString(@"New in this version:\n%@", @"HSLUpdateChecker upgrade alert message text. The argument is the release notes for the update.");
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[NSString stringWithFormat:titleFormat, appStoreVersion]
+                                                        message:[NSString stringWithFormat:messageFormat, releaseNotes]
+                                                       delegate:[HSLUpdateChecker sharedUpdateChecker]
+                                              cancelButtonTitle:NSLocalizedString(@"Not Now", @"HSLUpdateChecker upgrade alert 'Not Now' button.")
+                                              otherButtonTitles:NSLocalizedString(@"Update", @"HSLUpdateChecker upgrade alert 'Update' button."), nil];
+        [alert show];
     }];
 }
 
-+ (void) checkForUpdateWithHandler:(void (^)(NSString *, NSString *, NSString *, NSString *))handler
++ (void) checkForUpdateWithHandler:(void (^)(NSString *appStoreVersion, NSString *localVersion, NSString *releaseNotes, NSString *updateURL))handler
 {
     // Go to a background thread for the update check.
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -65,11 +67,11 @@
             }
             else
             {
-                NSArray *results = [dict objectForKey:@"results"];
+                NSArray *results = dict[@"results"];
                 if (results.count > 0)
                 {
-                    NSDictionary *result = [results objectAtIndex:0];
-                    NSString *appStoreVersion = [result objectForKey:@"version"];
+                    NSDictionary *result = results[0];
+                    NSString *appStoreVersion = result[@"version"];
                     
                     NSString *localVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
                     if (![localVersion isEqualToString:appStoreVersion])
@@ -81,13 +83,14 @@
                             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:checkedAppStoreVersionKey];
                             [[NSUserDefaults standardUserDefaults] synchronize];
                             
-                            [HSLUpdateChecker sharedUpdateChecker].updateUrl = [result objectForKey:@"trackViewUrl"];
-                            
-                            NSString *releaseNotes = [result objectForKey:@"releaseNotes"];
+                            NSString *updateUrl = result[@"trackViewUrl"];
+                            NSString *releaseNotes = result[@"releaseNotes"];
                             
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 if (handler)
-                                    handler(appStoreVersion, localVersion, releaseNotes, [HSLUpdateChecker sharedUpdateChecker].updateUrl);
+                                {
+                                    handler(appStoreVersion, localVersion, releaseNotes, updateUrl);
+                                }
                             });
                         }
                     }

@@ -17,7 +17,10 @@
 
 @interface HSLUpdateChecker : NSObject <UIAlertViewDelegate>
 
+// Check for update and present a UIAlertView if there is one available.
 + (void) checkForUpdate;
+
+// Check for update and call the handler block to present your own UI or do whatever you want. The handler will only be called if an update is available.
 + (void) checkForUpdateWithHandler:(void (^)(NSString *appStoreVersion, NSString *localVersion, NSString *releaseNotes, NSString *updateURL))handler;
 
 @end
