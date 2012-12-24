@@ -73,8 +73,15 @@
                     NSDictionary *result = results[0];
                     NSString *appStoreVersion = result[@"version"];
                     
+                    // We first try for CFBundleShortVersionString which is normally the user-visible version string
                     NSString *localVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-                    if (![localVersion isEqualToString:appStoreVersion])
+                    if (!localVersion)
+                    {
+                        // Try using CFBundleVersion instead
+                        localVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+                    }
+                    
+                    if (localVersion && ![localVersion isEqualToString:appStoreVersion])
                     {
                         // Different! Present an alert to the user about it if we haven't already for this appStoreVersion.
                         NSString *checkedAppStoreVersionKey = [NSString stringWithFormat:@"HSL_UPDATE_CHECKER_CHECKED_%@", appStoreVersion];
