@@ -51,7 +51,10 @@
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_async(queue, ^{
         NSString *bundleId = [[NSBundle mainBundle] bundleIdentifier];
-        NSString *urlString = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?bundleId=%@", bundleId];
+        NSLocale *locale = [NSLocale currentLocale];
+        NSString *countryCode = [locale objectForKey:NSLocaleCountryCode];
+        NSString *languageCode = [locale objectForKey:NSLocaleLanguageCode];
+        NSString *urlString = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?bundleId=%@&country=%@&lang=%@", bundleId, countryCode, languageCode];
         NSURL *url = [NSURL URLWithString:urlString];
 
         NSError *error = nil;
@@ -83,7 +86,7 @@
                     
                     if (localVersion && ![localVersion isEqualToString:appStoreVersion])
                     {
-                        // Different! Present an alert to the user about it if we haven't already for this appStoreVersion.
+                        // Different! Tell our handler about it if we haven't already for this appStoreVersion.
                         NSString *checkedAppStoreVersionKey = [NSString stringWithFormat:@"HSL_UPDATE_CHECKER_CHECKED_%@", appStoreVersion];
                         if (![[NSUserDefaults standardUserDefaults] boolForKey:checkedAppStoreVersionKey])
                         {
