@@ -96,12 +96,15 @@
                             NSString *updateUrl = result[@"trackViewUrl"];
                             NSString *releaseNotes = result[@"releaseNotes"];
                             
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                if (handler)
-                                {
-                                    handler(appStoreVersion, localVersion, releaseNotes, updateUrl);
-                                }
-                            });
+                            // If either of these are nil, don't do anything.
+                            if (updateUrl && releaseNotes) {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    if (handler)
+                                    {
+                                        handler(appStoreVersion, localVersion, releaseNotes, updateUrl);
+                                    }
+                                });
+                            }
                         }
                     }
                 }
