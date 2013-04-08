@@ -3,7 +3,7 @@
 //  HSL Common Library
 //
 //  Created by John Arnold on 2012-08-14.
-//  Copyright (c) 2012 Handelabra Studio LLC. All rights reserved.
+//  Copyright (c) 2012-2013 Handelabra Studio LLC. All rights reserved.
 //
 
 #import "HSLUpdateChecker.h"
