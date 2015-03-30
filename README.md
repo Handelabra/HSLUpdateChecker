@@ -1,7 +1,7 @@
 HSLUpdateChecker
 ================
 
-** This code is deprecated due to reports of rejection by Apple. Example: https://github.com/Handelabra/HSLUpdateChecker/issues/7 **
+**IMPORTANT NOTE:** This code is deprecated due to reports of rejection by Apple. Example: https://github.com/Handelabra/HSLUpdateChecker/issues/7 
 
 Simple update checker for iOS apps that displays an alert view with update release notes and the option to go to the App Store when an update for your app is available on the App Store. 
 
